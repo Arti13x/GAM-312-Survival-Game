@@ -1,0 +1,91 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "CppPlayerController.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
+
+ACppPlayerController::ACppPlayerController()
+{
+	bShowMouseCursor = false;
+}
+
+void ACppPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (ULocalPlayer* LocalPlayer = GetLocalPlayer())
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		{
+			if (DefaultMappingContext)
+			{
+				Subsystem->AddMappingContext(DefaultMappingContext, 0);
+			}
+		}
+
+	}
+}
+
+void ACppPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
+	{ 
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACppPlayerController::Move);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACppPlayerController::Look);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACppPlayerController::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACppPlayerController::StopJumping);
+	}
+}
+
+void ACppPlayerController::Move(const FInputActionValue& Value)
+{
+	const FVector2D MovementVector = Value.Get<FVector2D>();
+
+	APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn)
+	{
+		return;
+	}
+
+
+	const FRotator ControlRot = ControlledPawn->GetControlRotation();
+	const FRotator YawRotation(0.f, ControlRot.Yaw, 0.f);
+
+	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+	ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
+	ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
+}
+
+void ACppPlayerController::Look(const FInputActionValue& Value)
+{
+	const FVector2D LookAxisVector = Value.Get<FVector2D>();
+
+	AddYawInput(LookAxisVector.X);
+	AddPitchInput(LookAxisVector.Y);
+}
+
+
+void ACppPlayerController::Jump(const FInputActionValue& Value)
+{
+	if (ACharacter* ControlledCharacter = GetCharacter())
+	{
+		ControlledCharacter->Jump();
+	}
+}
+
+void ACppPlayerController::StopJumping(const FInputActionValue& Value)
+{
+	if (ACharacter* ControlledCharacter = GetCharacter())
+	{
+		ControlledCharacter->StopJumping();
+	}
+}
