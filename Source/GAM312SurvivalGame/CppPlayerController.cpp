@@ -37,6 +37,7 @@ void ACppPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
 	{ 
+		//bind actions so they work with the input system
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ACppPlayerController::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACppPlayerController::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACppPlayerController::Jump);
@@ -44,6 +45,7 @@ void ACppPlayerController::SetupInputComponent()
 	}
 }
 
+//allow player to move forward/back and left/right based on input from the player
 void ACppPlayerController::Move(const FInputActionValue& Value)
 {
 	const FVector2D MovementVector = Value.Get<FVector2D>();
@@ -54,17 +56,19 @@ void ACppPlayerController::Move(const FInputActionValue& Value)
 		return;
 	}
 
-
+	//get the control rotation of the player and use it to determine the forward and right direction for movement
 	const FRotator ControlRot = ControlledPawn->GetControlRotation();
 	const FRotator YawRotation(0.f, ControlRot.Yaw, 0.f);
 
 	const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
+	//add movement input to the controlled pawn based on the movement vector and the forward and right direction
 	ControlledPawn->AddMovementInput(ForwardDirection, MovementVector.Y);
 	ControlledPawn->AddMovementInput(RightDirection, MovementVector.X);
 }
 
+//allow player to look around based on input from the player
 void ACppPlayerController::Look(const FInputActionValue& Value)
 {
 	const FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -73,7 +77,7 @@ void ACppPlayerController::Look(const FInputActionValue& Value)
 	AddPitchInput(LookAxisVector.Y);
 }
 
-
+//start the jump action when input by the player
 void ACppPlayerController::Jump(const FInputActionValue& Value)
 {
 	if (ACharacter* ControlledCharacter = GetCharacter())
@@ -82,6 +86,7 @@ void ACppPlayerController::Jump(const FInputActionValue& Value)
 	}
 }
 
+//stop the jump action
 void ACppPlayerController::StopJumping(const FInputActionValue& Value)
 {
 	if (ACharacter* ControlledCharacter = GetCharacter())
