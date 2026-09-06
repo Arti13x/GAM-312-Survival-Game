@@ -9,6 +9,14 @@ ACppPlayerChar::ACppPlayerChar()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+
+	/*
+	* did't work for some reason and wouldn't add a camera component to the blueprint character, so I added it in the blueprint instead
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
+	CameraComponent->SetupAttachment(GetMesh(), "head");
+	CameraComponent->bUsePawnControlRotation = true;
+	*/
+
 }
 
 // Called when the game starts or when spawned
