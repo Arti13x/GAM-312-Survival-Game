@@ -7,6 +7,7 @@
 #include "InputMappingContext.h"
 #include "InputAction.h"
 #include "GameFramework/Pawn.h"
+#include "CppInteractInterface.h"
 #include "GameFramework/Character.h"
 
 ACppPlayerController::ACppPlayerController()
@@ -42,6 +43,7 @@ void ACppPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACppPlayerController::Look);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACppPlayerController::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACppPlayerController::StopJumping);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACppPlayerController::Interact);
 	}
 }
 
@@ -92,5 +94,33 @@ void ACppPlayerController::StopJumping(const FInputActionValue& Value)
 	if (ACharacter* ControlledCharacter = GetCharacter())
 	{
 		ControlledCharacter->StopJumping();
+	}
+}
+
+void ACppPlayerController::Interact()
+{
+	FHitResult HitResult;
+	FVector TraceStart = PlayerCameraManager->GetCameraLocation();
+	FVector TraceEnd = TraceStart + (PlayerCameraManager->GetActorForwardVector() * 500.0f);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+	QueryParams.bTraceComplex = true;
+	QueryParams.bReturnFaceIndex = true;
+
+	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 2.0f, 0, 1.0f);
+
+	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	{
+		if (AActor* HitActor = HitResult.GetActor())
+		{
+			if (HitActor->GetClass()->ImplementsInterface(UCppInteractInterface::StaticClass()))
+			{
+				if (ICppInteractInterface* Interface = Cast<ICppInteractInterface>(HitActor))
+				{
+					Interface->Interact();
+				}
+			}
+		}
 	}
 }
