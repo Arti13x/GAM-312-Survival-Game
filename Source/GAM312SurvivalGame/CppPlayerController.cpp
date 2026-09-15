@@ -8,6 +8,8 @@
 #include "InputAction.h"
 #include "GameFramework/Pawn.h"
 #include "CppInteractInterface.h"
+#include "kismet/GameplayStatics.h"
+#include "CppPlayerChar.h"
 #include "GameFramework/Character.h"
 
 ACppPlayerController::ACppPlayerController()
@@ -108,12 +110,16 @@ void ACppPlayerController::Interact()
 	QueryParams.bTraceComplex = true;
 	QueryParams.bReturnFaceIndex = true;
 
-	DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Green, false, 2.0f, 0, 1.0f);
+	ACppPlayerChar* PlayerChar = Cast<ACppPlayerChar>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	
 
 	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 	{
 		if (AActor* HitActor = HitResult.GetActor())
 		{
+			UGameplayStatics::SpawnDecalAtLocation(GetWorld(), PlayerChar->hitDecal, FVector(10.0f, 10.0f, 10.0f), HitResult.Location, FRotator(-90, 0, 0), 2.0f);
+
 			if (HitActor->GetClass()->ImplementsInterface(UCppInteractInterface::StaticClass()))
 			{
 				if (ICppInteractInterface* Interface = Cast<ICppInteractInterface>(HitActor))

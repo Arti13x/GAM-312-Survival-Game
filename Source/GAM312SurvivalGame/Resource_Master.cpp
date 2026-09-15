@@ -2,6 +2,8 @@
 
 
 #include "Resource_Master.h"
+#include "CppPlayerChar.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AResource_Master::AResource_Master()
@@ -38,31 +40,38 @@ void AResource_Master::Tick(float DeltaTime)
 
 void AResource_Master::Interact()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Interacted with %s"), *resourceName);
+	ACppPlayerChar* PlayerChar = Cast<ACppPlayerChar>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	if (totalResourceAmount > 0)
+	if (PlayerChar->Stamina > 5.0f) 
 	{
-		totalResourceAmount = totalResourceAmount - 5;
+		if (totalResourceAmount > 0)
+		{
+			totalResourceAmount = totalResourceAmount - resourceAmount;
 
-		if (resourceName == "Wood")
-		{
-			check(GEngine != nullptr);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Wood Collected"));
+			if (resourceName == "Wood")
+			{
+				PlayerChar->ResourcesArray[0] += resourceAmount;
+			}
+			else if (resourceName == "Stone")
+			{
+				PlayerChar->ResourcesArray[1] += resourceAmount;
+			}
+			else if (resourceName == "Berry")
+			{
+				PlayerChar->ResourcesArray[2] += resourceAmount;
+			}
+
+			PlayerChar->SetStamina(-5.0f);
 		}
-		else if (resourceName == "Stone")
+		else
 		{
-			check(GEngine != nullptr);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Stone Collected"));
-		}
-		else if (resourceName == "Berry")
-		{
-			check(GEngine != nullptr);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Berry Collected"));
+			Destroy();
 		}
 	}
 	else
 	{
-		Destroy();
+		check(GEngine != nullptr);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Not enough stamina to collect resource"));
 	}
 }
 

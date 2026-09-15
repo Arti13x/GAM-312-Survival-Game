@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
-#include "Resource_Master.h"
+#include "kismet/GameplayStatics.h"
 #include "CppPlayerChar.generated.h"
 
 
@@ -61,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Resources")
 		TArray<FString> ResourcesNameArray;
+
+	UPROPERTY(EditAnywhere, Category = "Hit Marker")
+		UMaterialInterface* hitDecal;
 
 	/* does not work with Input action system, so I moved it to the player controller and added an interface to the resource master
 	UFUNCTION()
