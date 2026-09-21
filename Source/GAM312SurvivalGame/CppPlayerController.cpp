@@ -46,6 +46,7 @@ void ACppPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACppPlayerController::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACppPlayerController::StopJumping);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ACppPlayerController::Interact);
+		EnhancedInputComponent->BindAction(RotateBuildingAction, ETriggerEvent::Started, this, &ACppPlayerController::RotateBuilding);
 	}
 }
 
@@ -112,21 +113,36 @@ void ACppPlayerController::Interact()
 
 	ACppPlayerChar* PlayerChar = Cast<ACppPlayerChar>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	
-
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+	if (PlayerChar->isBuilding == false) 
 	{
-		if (AActor* HitActor = HitResult.GetActor())
+		if (GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 		{
-			UGameplayStatics::SpawnDecalAtLocation(GetWorld(), PlayerChar->hitDecal, FVector(10.0f, 10.0f, 10.0f), HitResult.Location, FRotator(-90, 0, 0), 2.0f);
-
-			if (HitActor->GetClass()->ImplementsInterface(UCppInteractInterface::StaticClass()))
+			if (AActor* HitActor = HitResult.GetActor())
 			{
-				if (ICppInteractInterface* Interface = Cast<ICppInteractInterface>(HitActor))
+				UGameplayStatics::SpawnDecalAtLocation(GetWorld(), PlayerChar->hitDecal, FVector(10.0f, 10.0f, 10.0f), HitResult.Location, FRotator(-90, 0, 0), 2.0f);
+
+				if (HitActor->GetClass()->ImplementsInterface(UCppInteractInterface::StaticClass()))
 				{
-					Interface->Interact();
+					if (ICppInteractInterface* Interface = Cast<ICppInteractInterface>(HitActor))
+					{
+						Interface->Interact();
+					}
 				}
 			}
 		}
+	}
+	else
+	{
+		PlayerChar->isBuilding = false;
+	}
+	
+}
+
+void ACppPlayerController::RotateBuilding()
+{
+	ACppPlayerChar* PlayerChar = Cast<ACppPlayerChar>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerChar->isBuilding)
+	{
+		PlayerChar->RotateBuilding();
 	}
 }
