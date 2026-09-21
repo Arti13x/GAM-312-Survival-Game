@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 #include "kismet/GameplayStatics.h"
+#include "BuildingPart.h"
 #include "CppPlayerChar.generated.h"
 
 
@@ -65,11 +66,27 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Hit Marker")
 		UMaterialInterface* hitDecal;
 
+
+	//add building variables
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Building Supplies")
+		TArray<int> BuildingArray;
+
+	UPROPERTY()
+		bool isBuilding;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TSubclassOf<ABuildingPart> BuildPartClass;
+
+	UPROPERTY()
+		ABuildingPart* spawnedPart;
+
+
 	/* does not work with Input action system, so I moved it to the player controller and added an interface to the resource master
 	UFUNCTION()
 	void FindObject();
 	*/
 
+	//setters for health, stamina, and hunger
 	UFUNCTION(BlueprintCallable)
 		void SetHealth(float value);
 
@@ -79,6 +96,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetHunger(float value);
 
+	//decrease stats over time
 	UFUNCTION()
 		void DecreaseStats();
 
@@ -86,4 +104,16 @@ public:
 	UFUNCTION()
 		void GiveResource(float amount, FString resourceType);
 	*/
+
+	//building functions
+	UFUNCTION(BlueprintCallable)
+	void UpdateResources(float woodAmount, float stoneAmount, FString buildingObject);
+
+	UFUNCTION(BlueprintCallable)
+	void spawnBuilding(int buildingID, bool& isSuccess);
+
+	UFUNCTION()
+	void RotateBuilding();
+
+
 };

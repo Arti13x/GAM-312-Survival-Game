@@ -9,18 +9,19 @@ ACppPlayerChar::ACppPlayerChar()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
-	/*
-	* did't work for some reason and wouldn't add a camera component to the blueprint character, so I added it in the blueprint instead
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera"));
 	CameraComponent->SetupAttachment(GetMesh(), "head");
 	CameraComponent->bUsePawnControlRotation = true;
-	*/
+	
 
+
+	//set arrarys
 	ResourcesArray.SetNum(3);
 	ResourcesNameArray.Add(TEXT("Wood"));
 	ResourcesNameArray.Add(TEXT("Stone"));
 	ResourcesNameArray.Add(TEXT("Berry"));
+
+	BuildingArray.SetNum(3);
 
 }
 
@@ -38,6 +39,17 @@ void ACppPlayerChar::BeginPlay()
 void ACppPlayerChar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (isBuilding)
+	{
+		if (spawnedPart)
+		{
+			FVector StartLocation = CameraComponent->GetComponentLocation();
+			FVector Direction = CameraComponent->GetForwardVector() * 400.0f;
+			FVector EndLocation = StartLocation + Direction;
+			spawnedPart->SetActorLocation(EndLocation);
+		}
+	}
 
 }
 
@@ -69,26 +81,22 @@ void ACppPlayerChar::FindObject()
 		{
 			FString hitName = HitResource->resourceName;
 			int resourceValue = HitResource->resourceAmount;
-
 			HitResource->totalResourceAmount = HitResource->totalResourceAmount - resourceValue;
 
 			if (HitResource) 
 			{
 				GiveResource(resourceValue, hitName);
-
 				check(GEngine != nullptr);
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Resource Collected"));
 			}
 			else
 			{
 				HitResource->Destroy();
-
 				check(GEngine != nullptr);
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Resource Depleted"));
 			}
 		}
 	}
-
 }
 */
 
@@ -149,4 +157,63 @@ void ACppPlayerChar::GiveResource(float amount, FString resourceType)
 	}
 }
 */
+
+void ACppPlayerChar::UpdateResources(float woodAmount, float stoneAmount, FString buildingObject)
+{
+	if (woodAmount <= ResourcesArray[0])
+	{
+		if (stoneAmount <= ResourcesArray[1])
+		{
+			ResourcesArray[0] = ResourcesArray[0] - woodAmount;
+			ResourcesArray[1] = ResourcesArray[1] - stoneAmount;
+
+			if (buildingObject == "Wall")
+			{
+				BuildingArray[0] = BuildingArray[0] + 1;
+			}
+			else if (buildingObject == "Floor")
+			{
+				BuildingArray[1] = BuildingArray[1] + 1;
+			}
+			else if (buildingObject == "Ceiling")
+			{
+				BuildingArray[2] = BuildingArray[2] + 1;
+			}
+		}
+	}
+}
+
+void ACppPlayerChar::spawnBuilding(int buildingID, bool& isSuccess)
+{
+	if (!isBuilding)
+	{
+		if (BuildingArray[buildingID] >= 1)
+		{
+			isBuilding = true;
+			FActorSpawnParameters SpawnParams;
+			FVector StartLocation = CameraComponent->GetComponentLocation();
+			FVector Direction = CameraComponent->GetForwardVector() * 400.0f;
+			FVector EndLocation = StartLocation + Direction;
+			FRotator myRot(0, 0, 0);
+
+			BuildingArray[buildingID] = BuildingArray[buildingID] - 1;
+
+			spawnedPart = GetWorld()->SpawnActor<ABuildingPart>(BuildPartClass, EndLocation, myRot, SpawnParams);
+			
+			isSuccess = true;
+		}
+		
+		isSuccess = false;
+	}
+}
+
+void ACppPlayerChar::RotateBuilding()
+{
+	if (isBuilding)
+	{
+		spawnedPart->AddActorWorldRotation(FRotator(0, 90, 0));
+	}
+}
+
+
 
