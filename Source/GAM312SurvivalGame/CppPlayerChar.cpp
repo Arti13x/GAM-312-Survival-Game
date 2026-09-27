@@ -40,6 +40,8 @@ void ACppPlayerChar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	playerUI->updateBars(Health, Hunger, Stamina);
+
 	if (isBuilding)
 	{
 		if (spawnedPart)

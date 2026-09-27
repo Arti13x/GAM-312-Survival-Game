@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "kismet/GameplayStatics.h"
 #include "BuildingPart.h"
+#include "PlayerWidget.h"
 #include "CppPlayerChar.generated.h"
 
 
@@ -79,6 +80,11 @@ public:
 
 	UPROPERTY()
 		ABuildingPart* spawnedPart;
+
+
+	//set up the player UI
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPlayerWidget* playerUI;
 
 
 	/* does not work with Input action system, so I moved it to the player controller and added an interface to the resource master
