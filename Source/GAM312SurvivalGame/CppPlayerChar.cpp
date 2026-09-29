@@ -33,6 +33,12 @@ void ACppPlayerChar::BeginPlay()
 	FTimerHandle StatsTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(StatsTimerHandle, this, &ACppPlayerChar::DecreaseStats, 3.0f, true);
 	
+	if (objectiveUI)
+	{
+		objectiveUI->UpdatematOBJ(0.0f);
+		objectiveUI->UpdatebuildObj(0.0f);
+	}
+
 }
 
 // Called every frame
@@ -141,8 +147,7 @@ void ACppPlayerChar::DecreaseStats()
 	}
 }
 
-/*
-* does not work with Input action system, so I moved it to the player controller and added an interface to the resource master
+
 void ACppPlayerChar::GiveResource(float amount, FString resourceType)
 {
 	if (resourceType == "Wood")
@@ -158,7 +163,6 @@ void ACppPlayerChar::GiveResource(float amount, FString resourceType)
 		ResourcesArray[2] = ResourcesArray[2] + amount;
 	}
 }
-*/
 
 void ACppPlayerChar::UpdateResources(float woodAmount, float stoneAmount, FString buildingObject)
 {

@@ -134,6 +134,10 @@ void ACppPlayerController::Interact()
 	else
 	{
 		PlayerChar->isBuilding = false;
+		
+		PlayerChar->objectsBuilt = PlayerChar->objectsBuilt + 1.0f;
+		PlayerChar->objectiveUI->UpdatebuildObj(PlayerChar->objectsBuilt);
+
 	}
 	
 }

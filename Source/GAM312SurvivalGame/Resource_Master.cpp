@@ -48,18 +48,11 @@ void AResource_Master::Interact()
 		{
 			totalResourceAmount = totalResourceAmount - resourceAmount;
 
-			if (resourceName == "Wood")
-			{
-				PlayerChar->ResourcesArray[0] += resourceAmount;
-			}
-			else if (resourceName == "Stone")
-			{
-				PlayerChar->ResourcesArray[1] += resourceAmount;
-			}
-			else if (resourceName == "Berry")
-			{
-				PlayerChar->ResourcesArray[2] += resourceAmount;
-			}
+			PlayerChar->GiveResource(resourceAmount, resourceName);
+
+			PlayerChar->matsCollected = PlayerChar->matsCollected + 5.0f;
+
+			PlayerChar->objectiveUI->UpdatematOBJ(PlayerChar->matsCollected);
 
 			PlayerChar->SetStamina(-5.0f);
 		}
