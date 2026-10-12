@@ -33,6 +33,11 @@ void ACppPlayerChar::BeginPlay()
 	FTimerHandle StatsTimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(StatsTimerHandle, this, &ACppPlayerChar::DecreaseStats, 3.0f, true);
 	
+	if (Health <= 0)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(StatsTimerHandle);
+	}
+	
 	if (objectiveUI)
 	{
 		objectiveUI->UpdatematOBJ(0.0f);
